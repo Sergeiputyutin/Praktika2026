@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include <mylib.hpp>
 
 void shellSort(int* array, int sizeArray)
@@ -20,7 +19,8 @@ void shellSort(int* array, int sizeArray)
     }
 }
 
-void printArr(const int* array, const int sizeArray) {
+void printArr(const int* array, const int sizeArray) 
+{
     for(int i = 0; i < sizeArray; i++)
     {
         std::cout << array[i] << " ";
@@ -28,20 +28,20 @@ void printArr(const int* array, const int sizeArray) {
     std::cout << '\n';
 }
 
-void fillArray(int* array, int sizeArray){
-
+void fillArray(int* array, int sizeArray)
+{
     mylib::Rng rng;
 
     for(int i = 0; i < sizeArray; i++)
     {
-        array[i] = rng.nextInt(1, 1000);
+        array[i] = rng.nextInt(1, 10);
     }
 }
 
 int main() {
     int const sizeArray = 10;
     int* array = new int[sizeArray];
-    
+
     fillArray(array, sizeArray);
     printArr(array, sizeArray);
     shellSort(array, sizeArray);
