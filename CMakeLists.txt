@@ -13,6 +13,9 @@ file(GLOB_RECURSE APP_SOURCES CONFIGURE_DEPENDS
     src/*.c
     src/*.h
 )
-
+add_library(mylib INTERFACE)
+target_include_directories(mylib INTERFACE include/)
 
 add_executable(Praktika2026 ${APP_SOURCES})
+
+target_link_libraries(Praktika2026 PRIVATE mylib)
