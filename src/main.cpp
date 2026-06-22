@@ -36,36 +36,59 @@ void shellSort(int* array, int sizeArray) {
     }
 }
 
-// Сохранение массива в файл
+// Сохранение массива в файл (с размером)
 void saveArrayToFile(const int* array, int sizeArray, const char* filename) {
     std::ofstream file(filename);
     if (file.is_open()) {
+        // Сохраняем размер массива первым числом
+        file << sizeArray << "\n";
         for(int i = 0; i < sizeArray; i++) {
             file << array[i] << " ";
         }
         file.close();
-        std::cout << "Массив сохранен в: " << filename << std::endl;
+        std::cout << "Array saved to: " << filename << std::endl;
     } else {
-        std::cout << "Ошибка: не удалось создать файл " << filename << std::endl;
+        std::cout << "Error: cannot create file " << filename << std::endl;
     }
 }
 
-// Загрузка массива из файла
-void loadArrayFromFile(int* array, int sizeArray, const char* filename) {
+// Загрузка массива из файла (с проверкой размера)
+int* loadArrayFromFile(const char* filename, int& loadedSize) {
     std::ifstream file(filename);
-    if (file.is_open()) {
-        for(int i = 0; i < sizeArray; i++) {
-            file >> array[i];
-        }
-        file.close();
-        std::cout << "Массив загружен из: " << filename << std::endl;
-    } else {
-        std::cout << "Ошибка: не удалось открыть файл " << filename << std::endl;
+    if (!file.is_open()) {
+        std::cout << "Error: cannot open file " << filename << std::endl;
+        return nullptr;
     }
+    
+    // Читаем размер массива
+    file >> loadedSize;
+    if (loadedSize <= 0) {
+        std::cout << "Error: invalid array size" << std::endl;
+        file.close();
+        return nullptr;
+    }
+    
+    // Выделяем память и читаем элементы
+    int* array = new int[loadedSize];
+    for(int i = 0; i < loadedSize; i++) {
+        file >> array[i];
+    }
+    
+    // Проверяем, сколько чисел реально прочитано
+    if (file.fail()) {
+        std::cout << "Error: failed to read array data" << std::endl;
+        delete[] array;
+        file.close();
+        return nullptr;
+    }
+    
+    file.close();
+    std::cout << "Array loaded from: " << filename << " (size: " << loadedSize << ")" << std::endl;
+    return array;
 }
 
 int main() {
-    // НАСТРОЙКА РУССКОГО ЯЗЫКА ДЛЯ LINUX
+    // Настройка русского языка для Linux
     std::setlocale(LC_ALL, "ru_RU.UTF-8");
     std::locale::global(std::locale("ru_RU.UTF-8"));
     
@@ -74,7 +97,7 @@ int main() {
     
     // Заполняем массив
     fillArray(array, sizeArray);
-    std::cout << "Исходный массив: ";
+    std::cout << "Original array: ";
     printArr(array, sizeArray);
     
     // Сохраняем исходный массив в файл
@@ -82,19 +105,30 @@ int main() {
     
     // Сортируем массив
     shellSort(array, sizeArray);
-    std::cout << "Отсортированный массив: ";
+    std::cout << "Sorted array: ";
     printArr(array, sizeArray);
     
     // Сохраняем отсортированный массив в файл
     saveArrayToFile(array, sizeArray, "output.txt");
     
-    // Пример загрузки из файла
-    int* loadedArray = new int[sizeArray];
-    loadArrayFromFile(loadedArray, sizeArray, "input.txt");
-    std::cout << "Загруженный массив: ";
-    printArr(loadedArray, sizeArray);
-    delete[] loadedArray;
-    
     delete[] array;
+    
+    // Загружаем массив из файла
+    std::cout << "\n=== Loading array from file ===" << std::endl;
+    int loadedSize = 0;
+    int* loadedArray = loadArrayFromFile("input.txt", loadedSize);
+    
+    if (loadedArray != nullptr) {
+        std::cout << "Loaded array: ";
+        printArr(loadedArray, loadedSize);
+        
+        // Сортируем загруженный массив
+        shellSort(loadedArray, loadedSize);
+        std::cout << "Sorted loaded array: ";
+        printArr(loadedArray, loadedSize);
+        
+        delete[] loadedArray;
+    }
+    
     return 0;
 }
