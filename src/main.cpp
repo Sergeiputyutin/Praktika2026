@@ -36,11 +36,10 @@ void shellSort(int* array, int sizeArray) {
     }
 }
 
-// Сохранение массива в файл (с размером)
+// Сохранение массива в файл
 void saveArrayToFile(const int* array, int sizeArray, const char* filename) {
     std::ofstream file(filename);
     if (file.is_open()) {
-        // Сохраняем размер массива первым числом
         file << sizeArray << "\n";
         for(int i = 0; i < sizeArray; i++) {
             file << array[i] << " ";
@@ -52,7 +51,7 @@ void saveArrayToFile(const int* array, int sizeArray, const char* filename) {
     }
 }
 
-// Загрузка массива из файла (с проверкой размера)
+// Загрузка массива из файла (возвращает новый массив)
 int* loadArrayFromFile(const char* filename, int& loadedSize) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -74,14 +73,6 @@ int* loadArrayFromFile(const char* filename, int& loadedSize) {
         file >> array[i];
     }
     
-    // Проверяем, сколько чисел реально прочитано
-    if (file.fail()) {
-        std::cout << "Error: failed to read array data" << std::endl;
-        delete[] array;
-        file.close();
-        return nullptr;
-    }
-    
     file.close();
     std::cout << "Array loaded from: " << filename << " (size: " << loadedSize << ")" << std::endl;
     return array;
@@ -93,42 +84,39 @@ int main() {
     std::locale::global(std::locale("ru_RU.UTF-8"));
     
     const int sizeArray = 10;
+    
+    // 1. СОЗДАЕМ И СОХРАНЯЕМ МАССИВ
+    std::cout << "=== Creating and saving array ===" << std::endl;
     int* array = new int[sizeArray];
-    
-    // Заполняем массив
     fillArray(array, sizeArray);
-    std::cout << "Original array: ";
+    std::cout << "Generated array: ";
     printArr(array, sizeArray);
-    
-    // Сохраняем исходный массив в файл
     saveArrayToFile(array, sizeArray, "input.txt");
+    delete[] array;  // Освобождаем память
     
-    // Сортируем массив
-    shellSort(array, sizeArray);
-    std::cout << "Sorted array: ";
-    printArr(array, sizeArray);
-    
-    // Сохраняем отсортированный массив в файл
-    saveArrayToFile(array, sizeArray, "output.txt");
-    
-    delete[] array;
-    
-    // Загружаем массив из файла
+    // 2. ЗАГРУЖАЕМ МАССИВ ИЗ ФАЙЛА
     std::cout << "\n=== Loading array from file ===" << std::endl;
     int loadedSize = 0;
     int* loadedArray = loadArrayFromFile("input.txt", loadedSize);
     
-    if (loadedArray != nullptr) {
-        std::cout << "Loaded array: ";
-        printArr(loadedArray, loadedSize);
-        
-        // Сортируем загруженный массив
-        shellSort(loadedArray, loadedSize);
-        std::cout << "Sorted loaded array: ";
-        printArr(loadedArray, loadedSize);
-        
-        delete[] loadedArray;
+    if (loadedArray == nullptr) {
+        std::cout << "Failed to load array from file" << std::endl;
+        return 1;
     }
+    
+    std::cout << "Loaded array: ";
+    printArr(loadedArray, loadedSize);
+    
+    // 3. СОРТИРУЕМ ЗАГРУЖЕННЫЙ МАССИВ
+    std::cout << "\n=== Sorting loaded array ===" << std::endl;
+    shellSort(loadedArray, loadedSize);
+    std::cout << "Sorted array: ";
+    printArr(loadedArray, loadedSize);
+    
+    // 4. СОХРАНЯЕМ ОТСОРТИРОВАННЫЙ МАССИВ
+    saveArrayToFile(loadedArray, loadedSize, "output.txt");
+    
+    delete[] loadedArray;
     
     return 0;
 }
