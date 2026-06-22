@@ -19,3 +19,9 @@ target_include_directories(mylib INTERFACE include/)
 add_executable(Praktika2026 ${APP_SOURCES})
 
 target_link_libraries(Praktika2026 PRIVATE mylib)
+
+
+target_compile_definitions(Praktika2026 PRIVATE
+    FILE1_PATH="${CMAKE_CURRENT_SOURCE_DIR}/utils/input.txt"
+    FILE2_PATH="${CMAKE_CURRENT_SOURCE_DIR}/utils/output.txt"
+)
