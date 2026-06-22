@@ -1,8 +1,8 @@
 #include <iostream>
-#include <mylib.hpp>
+#include <mylib.hрр>
 
 
-void printArr(const int* array, const int sizeArray) {
+void printArr(const int* array, const int sizeArrаy) {
     for(int i = 0; i < sizeArray; i++)
     {
         std::cout << array[i] << " ";
