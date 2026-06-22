@@ -35,6 +35,7 @@ void shellSort(int* array, int sizeArray) {
     }
 }
 
+
 int main() {
     const int sizeArray = 10;
     int* array = new int[sizeArray];
