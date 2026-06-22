@@ -2,7 +2,6 @@
 #include <mylib.hpp>
 #include <fstream>
 #include <locale>
-#include <unistd.h>  // для getcwd
 
 void printArr(const int* array, const int sizeArray) {
     for(int i = 0; i < sizeArray; i++)
@@ -37,148 +36,103 @@ void shellSort(int* array, int sizeArray) {
     }
 }
 
-// ПРОВЕРКА СУЩЕСТВОВАНИЯ ФАЙЛА
-bool fileExists(const char* filename) {
-    std::ifstream file(filename);
-    return file.good();
-}
-
-// СОХРАНЕНИЕ С ПОЛНЫМ ПУТЕМ
+// Сохранение массива в файл
 void saveArrayToFile(const int* array, int sizeArray, const char* filename) {
-    // Получаем текущую директорию
-    char cwd[1024];
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        std::cout << "Current directory: " << cwd << std::endl;
-    }
-    
-    std::cout << "Saving to: " << filename << std::endl;
-    
-    std::ofstream file(filename, std::ios::out | std::ios::trunc);
-    if (!file.is_open()) {
-        std::cout << "ERROR: Cannot open file for writing!" << std::endl;
-        return;
-    }
-    
-    // Записываем каждый элемент с новой строки
-    for(int i = 0; i < sizeArray; i++) {
-        file << array[i];
-        if (i < sizeArray - 1) {
-            file << "\n";  // Каждое число на новой строке!
+    std::ofstream file(filename);
+    if (file.is_open()) {
+        for(int i = 0; i < sizeArray; i++) {
+            file << array[i] << " ";
         }
-    }
-    file << std::endl;
-    
-    file.close();
-    std::cout << "Array saved to: " << filename << std::endl;
-    
-    // Проверяем, что файл создан
-    if (fileExists(filename)) {
-        std::cout << "File exists and is readable" << std::endl;
+        file << std::endl;
+        file.close();
+        std::cout << "Массив сохранен в файл: " << filename << std::endl;
     } else {
-        std::cout << "WARNING: File does not exist after save!" << std::endl;
+        std::cout << "Ошибка: не удалось открыть файл " << filename << " для записи" << std::endl;
     }
 }
 
-// ЗАГРУЗКА - ПОСТРОЧНО
+// Загрузка массива из файла
 bool loadArrayFromFile(int* array, int sizeArray, const char* filename) {
-    std::cout << "Loading from: " << filename << std::endl;
-    
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cout << "ERROR: Cannot open file for reading!" << std::endl;
+        std::cout << "Ошибка: не удалось открыть файл " << filename << " для чтения" << std::endl;
         return false;
     }
     
-    // Читаем построчно
     int count = 0;
-    std::string line;
-    
-    while (std::getline(file, line) && count < sizeArray) {
-        // Пропускаем пустые строки
-        if (line.empty()) continue;
-        
-        // Преобразуем строку в число
-        int value = std::stoi(line);
+    int value;
+    while (file >> value && count < sizeArray) {
         array[count] = value;
-        std::cout << "Read line " << count << ": " << value << std::endl;
         count++;
     }
     
     file.close();
     
     if (count != sizeArray) {
-        std::cout << "WARNING: Read " << count << " elements, expected " << sizeArray << std::endl;
+        std::cout << "Предупреждение: прочитано " << count << " элементов, ожидалось " << sizeArray << std::endl;
         return false;
     }
     
-    std::cout << "Array loaded successfully!" << std::endl;
+    std::cout << "Массив загружен из файла: " << filename << std::endl;
     return true;
 }
 
-// ПОКАЗАТЬ СОДЕРЖИМОЕ ФАЙЛА
-void showFileContent(const char* filename) {
+// Проверка существования файла
+bool fileExists(const char* filename) {
     std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cout << "Cannot open file: " << filename << std::endl;
-        return;
-    }
-    
-    std::cout << "\n=== Content of " << filename << " ===" << std::endl;
-    std::string line;
-    int lineNum = 0;
-    while (std::getline(file, line)) {
-        std::cout << "Line " << lineNum++ << ": '" << line << "'" << std::endl;
-    }
-    std::cout << "=== End of file ===" << std::endl;
-    file.close();
+    return file.good();
 }
 
 int main() {
+    // Настройка русского языка
     std::setlocale(LC_ALL, "ru_RU.UTF-8");
     std::locale::global(std::locale("ru_RU.UTF-8"));
     
     const int sizeArray = 10;
     int* array = new int[sizeArray];
     
-    // ПОКАЗЫВАЕМ ТЕКУЩУЮ ДИРЕКТОРИЮ
-    char cwd[1024];
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        std::cout << "Working directory: " << cwd << std::endl;
-    }
+    std::cout << "=== Генерация и сохранение массива ===" << std::endl;
     
-    // 1. СОЗДАЕМ МАССИВ
+    // 1. Генерируем массив
     fillArray(array, sizeArray);
-    std::cout << "\nGenerated array: ";
+    std::cout << "Сгенерированный массив: ";
     printArr(array, sizeArray);
     
-    // 2. СОХРАНЯЕМ
+    // 2. Сохраняем в файл
     saveArrayToFile(array, sizeArray, "input.txt");
     
-    // 3. ПОКАЗЫВАЕМ СОДЕРЖИМОЕ ФАЙЛА
-    showFileContent("input.txt");
-    
-    // 4. ОЧИЩАЕМ МАССИВ
+    // 3. Очищаем массив (чтобы убедиться, что данные загружаются из файла)
     for(int i = 0; i < sizeArray; i++) {
         array[i] = 0;
     }
-    std::cout << "\nCleared array: ";
+    std::cout << "Массив очищен: ";
     printArr(array, sizeArray);
     
-    // 5. ЗАГРУЖАЕМ
-    if (loadArrayFromFile(array, sizeArray, "input.txt")) {
-        std::cout << "\nLoaded array: ";
-        printArr(array, sizeArray);
-        
-        // 6. СОРТИРУЕМ
-        shellSort(array, sizeArray);
-        std::cout << "\nSorted array: ";
-        printArr(array, sizeArray);
-        
-        // 7. СОХРАНЯЕМ РЕЗУЛЬТАТ
-        saveArrayToFile(array, sizeArray, "output.txt");
-    } else {
-        std::cout << "Failed to load array!" << std::endl;
+    std::cout << "\n=== Загрузка массива из файла ===" << std::endl;
+    
+    // 4. Загружаем массив из файла
+    if (!loadArrayFromFile(array, sizeArray, "input.txt")) {
+        std::cout << "Не удалось загрузить массив из файла" << std::endl;
+        delete[] array;
+        return 1;
     }
+    
+    std::cout << "Загруженный массив: ";
+    printArr(array, sizeArray);
+    
+    std::cout << "\n=== Сортировка массива ===" << std::endl;
+    
+    // 5. Сортируем
+    shellSort(array, sizeArray);
+    std::cout << "Отсортированный массив: ";
+    printArr(array, sizeArray);
+    
+    // 6. Сохраняем результат в другой файл
+    saveArrayToFile(array, sizeArray, "output.txt");
+    
+    std::cout << "\n=== Готово! ===" << std::endl;
+    std::cout << "Исходный массив сохранен в: input.txt" << std::endl;
+    std::cout << "Отсортированный массив сохранен в: output.txt" << std::endl;
     
     delete[] array;
     return 0;
