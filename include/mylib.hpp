@@ -3,8 +3,6 @@
 #include <cstdint>
 #include <chrono>
 
-
-
 namespace mylib {
 
     class Rng {
@@ -52,5 +50,4 @@ namespace mylib {
         uint64_t state;
         uint64_t inc;
     };
-
 }
