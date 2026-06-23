@@ -1,97 +1,29 @@
 #include <iostream>
-#include <fstream>
-#include <mylib.hpp>
-
-static void printArr(const int* array, const int sizeArray) {
-
-    for(int i = 0; i < sizeArray; i++)
-        std::cout << array[i] << " ";
-    std::cout << '\n';
-}
-
-static void fillArray(int* array, const int sizeArray, const int min, const int max) {
-
-    mylib::Rng rng;
-    for(int i = 0; i < sizeArray; i++)
-        array[i] = rng.nextInt(min, max);
-}
-
-static void shellSort(int* array, const int sizeArray) {
-
-    for(int gap = sizeArray / 2; gap > 0; gap /= 2) {
-        for(int i = gap; i < sizeArray; i++) {
-            int j, temp = array[i];
-
-            for(j = i; j >= gap && array[j - gap] > temp; j -= gap)
-                array[j] = array[j - gap];
-            
-            array[j] = temp;
-        }
-    }
-}
-
-static void readFromFile(const char* path, int*& array, int& size) {
-
-    std::ifstream file(path);
-    if (!file.is_open()) {
-        std::cerr << "Invalid path file";
-        return;
-    }
-
-    int num, count = 0;
-    while(file >> num) count++;
-
-    if(!file.eof()) {        
-        std::cerr << "Failed to write file";
-        return;
-    }
-    file.clear();
-    file.seekg(0);
-
-    size = count;
-    array = new int[count];
-
-    for(int i = 0; i < count; i++) 
-        file >> array[i];
-    
-    file.close();
-}
-
-static void writeToFile(const char* path, const int* array, const int& size) {
-
-    std::ofstream file(path);
-
-    if (!file.is_open()) 
-        std::cerr << "Not Open File\n";
-
-    for(int i = 0; i < size; i++)
-        file << array[i] << " ";
-
-    file.close();
-}
+#include "array.hpp"
 
 int main() {
 
-    const char* input = FILE1_PATH;
-    const char* output = FILE2_PATH;
+    Array<int> arr(nullptr, 0);  // пустой массив
 
-    int sizeArray = 30;
-    int* array = new int[sizeArray];
+    // заполнить случайными числами и вывести
+    arr.fillRnd(30, 0, 30);
+    std::cout << "Before sort: ";
+    arr.printArray();
 
-    //fillArray(array, sizeArray, 0, 30);
+    // записать в input.txt
+    arr.writeFile(FILE1_PATH);
 
-    //writeToFile(input, array, sizeArray);
-    readFromFile(input, array, sizeArray);
-    std::cout << "Read from file input: ";
-    printArr(array, sizeArray);
+    // прочитать из input.txt
+    arr.readFile(FILE1_PATH);
+    std::cout << "Read from file: ";
+    arr.printArray();
 
-    shellSort(array, sizeArray);
+    // отсортировать и записать в output.txt
+    arr.shellSort();
+    arr.writeFile(FILE2_PATH);
 
-    writeToFile(output, array, sizeArray);
-    readFromFile(output, array, sizeArray);
-    std::cout << "Read from file output: ";
-    printArr(array, sizeArray);
+    std::cout << "After sort: ";
+    arr.printArray();
 
-    delete[] array;
     return 0;
 }

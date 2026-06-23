@@ -11,7 +11,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 file(GLOB_RECURSE APP_SOURCES CONFIGURE_DEPENDS
     src/*.cpp
     src/*.c
-    src/*.h
+    src/*.hpp
 )
 add_library(mylib INTERFACE)
 target_include_directories(mylib INTERFACE include/)
