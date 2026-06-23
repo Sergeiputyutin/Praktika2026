@@ -51,6 +51,7 @@ template<typename T>
 void Array<T>::setArray(T* arr, int size)
 {
     cleanArray(size);
+    this->size=size;
     for(int i = 0; i < size; i++)
         this->arr[i] = arr[i];
 }
